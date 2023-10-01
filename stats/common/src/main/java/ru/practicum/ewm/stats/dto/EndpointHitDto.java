@@ -16,10 +16,13 @@ import static ru.practicum.ewm.stats.dto.util.DateTimeFormat.DATETIME_FORMAT;
 public class EndpointHitDto {
     @NotBlank
     private String app;
+
     @NotBlank
     private String uri;
+
     @NotBlank
     private String ip;
+
     @NotNull
     @JsonProperty("timestamp")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATETIME_FORMAT)

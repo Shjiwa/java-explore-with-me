@@ -19,7 +19,6 @@ import static ru.practicum.ewm.stats.dto.util.DateTimeFormat.DATETIME_FORMAT;
 @RestController
 @RequiredArgsConstructor
 public class StatsController {
-
     private final StatsService statsService;
 
     @PostMapping("/hit")

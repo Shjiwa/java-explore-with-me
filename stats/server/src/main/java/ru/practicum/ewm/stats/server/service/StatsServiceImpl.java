@@ -18,7 +18,7 @@ public class StatsServiceImpl implements StatsService {
     private final EndpointHitRepository endpointHitRepository;
 
     public void hit(EndpointHitDto endpointHitDto) {
-        endpointHitRepository.save(StatsMapper.fromDto(endpointHitDto));
+        endpointHitRepository.save(StatsMapper.INSTANCE.fromDto(endpointHitDto));
     }
 
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
