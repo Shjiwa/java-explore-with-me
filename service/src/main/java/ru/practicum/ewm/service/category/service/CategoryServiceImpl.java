@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.service.category.dto.CategoryDto;
-import ru.practicum.ewm.service.category.mapper.CategoryMapper;
 import ru.practicum.ewm.service.category.model.Category;
 import ru.practicum.ewm.service.category.repository.CategoryRepository;
 import ru.practicum.ewm.service.error.NotFoundError;
@@ -13,6 +12,8 @@ import ru.practicum.ewm.service.error.NotFoundError;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static ru.practicum.ewm.service.category.mapper.CategoryMapper.CATEGORY_MAPPER;
 
 @Slf4j
 @Service
@@ -22,19 +23,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public CategoryDto create(CategoryDto dto) {
-        return CategoryMapper.INSTANCE.toDto(categoryRepository.save(CategoryMapper.INSTANCE.fromDto(dto)));
+        return CATEGORY_MAPPER.toDto(categoryRepository.save(CATEGORY_MAPPER.fromDto(dto)));
     }
 
     @Override
     public List<CategoryDto> getAll(int from, int size) {
         return categoryRepository.findAll(PageRequest.of(from / size, size)).getContent().stream()
-                .map(CategoryMapper.INSTANCE::toDto)
+                .map(CATEGORY_MAPPER::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CategoryDto getById(Long catId) {
-        return CategoryMapper.INSTANCE.toDto(categoryRepository.findById(catId)
+        return CATEGORY_MAPPER.toDto(categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundError("Category id=" + catId + " not found.")));
     }
 
@@ -43,12 +44,14 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundError("Category id=" + catId + " not found."));
         Optional.ofNullable(dto.getName()).ifPresent(category::setName);
-        return CategoryMapper.INSTANCE.toDto(categoryRepository.save(category));
+        return CATEGORY_MAPPER.toDto(categoryRepository.save(category));
     }
 
     @Override
     public void delete(Long catId) {
-        categoryRepository.findById(catId).orElseThrow(() -> new NotFoundError("Category id=" + catId + " not found."));
+        if (!categoryRepository.existsById(catId)) {
+            throw new NotFoundError("Category id=" + catId + " not found.");
+        }
         categoryRepository.deleteById(catId);
     }
 }

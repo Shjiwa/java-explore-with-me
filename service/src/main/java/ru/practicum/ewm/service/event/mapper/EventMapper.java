@@ -12,7 +12,7 @@ import ru.practicum.ewm.service.event.model.Location;
 
 @Mapper
 public interface EventMapper {
-    EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
+    EventMapper EVENT_MAPPER = Mappers.getMapper(EventMapper.class);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "eventDate", source = "dto.eventTimestamp")
@@ -20,7 +20,7 @@ public interface EventMapper {
     @Mapping(target = "location", source = "location")
     Event fromDto(NewEventDto dto, Category category, Location location);
 
-    EventFullDto toFullDto(Event entity);
+    EventFullDto toFullDto(Event event);
 
-    EventShortDto toShortDto(Event entity);
+    EventShortDto toShortDto(Event event);
 }

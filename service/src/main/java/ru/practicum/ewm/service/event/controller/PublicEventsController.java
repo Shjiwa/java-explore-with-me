@@ -8,7 +8,7 @@ import ru.practicum.ewm.service.constant.SortMode;
 import ru.practicum.ewm.service.error.BadRequestError;
 import ru.practicum.ewm.service.event.dto.EventFullDto;
 import ru.practicum.ewm.service.event.dto.EventShortDto;
-import ru.practicum.ewm.service.event.service.EventService;
+import ru.practicum.ewm.service.event.service.PublicEventService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -23,7 +23,7 @@ import static ru.practicum.ewm.service.constant.DateTimeFormat.DATETIME_FORMAT;
 @RequestMapping("/events")
 @RequiredArgsConstructor
 public class PublicEventsController {
-    private final EventService eventService;
+    private final PublicEventService publicEventService;
 
     @GetMapping
     public List<EventShortDto> getAll(@RequestParam(defaultValue = "") String text,
@@ -38,15 +38,19 @@ public class PublicEventsController {
                                       @Valid @RequestParam(defaultValue = "0") @Min(0) int from,
                                       @Valid @RequestParam(defaultValue = "10") @Min(1) int size,
                                       HttpServletRequest request) {
+        log.info("Поступил запрос на получение списка событий: text={}, categories={}, paid={}, rangeStart={}, " +
+                "rangeEnd={}, onlyAvailable={}, sort={}, from={}, size={}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
         if (rangeStart != null && rangeEnd != null && rangeStart.isAfter(rangeEnd)) {
             throw new BadRequestError("Start date must be before end date");
         }
-        return eventService.getAllPublic(
+        return publicEventService.getAllPublic(
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
     }
 
     @GetMapping("/{id}")
     public EventFullDto getById(@PathVariable Long id, HttpServletRequest request) {
-        return eventService.getByIdPublic(id, request);
+        log.info("Поступил запрос на получение информации о событии с id={}", id);
+        return publicEventService.getByIdPublic(id, request);
     }
 }

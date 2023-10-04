@@ -8,7 +8,7 @@ import ru.practicum.ewm.service.user.model.User;
 
 @Mapper
 public interface UserMapper {
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+    UserMapper USER_MAPPER = Mappers.getMapper(UserMapper.class);
 
     UserDto toDto(User user);
 

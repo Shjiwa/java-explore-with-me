@@ -15,10 +15,10 @@ import java.util.List;
 public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("select e " +
            "from Event e " +
-           "where ((:users is null or e.initiator.id in :users) " +
-           "and (:states is null or e.state in :states) " +
-           "and (:categories is null or e.category.id in :categories) " +
-           "and (e.eventDate between :rangeStart and :rangeEnd))")
+           "where ((:users) is null or e.initiator.id in :users) " +
+           "and ((:states) is null or e.state in :states) " +
+           "and ((:categories) is null or e.category.id in :categories) " +
+           "and (e.eventDate between :rangeStart and :rangeEnd)")
     List<Event> findAllByAdmin(@Param("users") List<Long> users, @Param("states")List<EventState> states,
                                @Param("categories") List<Long> categories, @Param("rangeStart")LocalDateTime rangeStart,
                                @Param("rangeEnd") LocalDateTime rangeEnd, Pageable pageable);
@@ -27,7 +27,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("select e " +
            "from Event e " +
-           "where (e.state = 'published') " +
+           "where (e.state = 'PUBLISHED') " +
            "and (lower(e.annotation) like lower(concat('%', :text, '%')) " +
            "or lower(e.description) like lower(concat('%', :text, '%'))) " +
            "and ((:categories) is null or e.category.id in :categories) " +

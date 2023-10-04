@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.service.compilation.dto.CompilationDto;
 import ru.practicum.ewm.service.compilation.dto.NewCompilationDto;
 import ru.practicum.ewm.service.compilation.dto.UpdateCompilationRequest;
-import ru.practicum.ewm.service.compilation.mapper.CompilationMapper;
 import ru.practicum.ewm.service.compilation.model.Compilation;
 import ru.practicum.ewm.service.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.service.error.NotFoundError;
@@ -21,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static ru.practicum.ewm.service.compilation.mapper.CompilationMapper.COMPILATION_MAPPER;
 
 @Slf4j
 @Service
@@ -38,8 +39,7 @@ public class CompilationServiceImpl implements CompilationService {
             dto.setPinned(false);
         }
 
-        return CompilationMapper.INSTANCE
-                .toDto(compilationRepository.save(CompilationMapper.INSTANCE.fromDto(dto, events)));
+        return COMPILATION_MAPPER .toDto(compilationRepository.save(COMPILATION_MAPPER.fromDto(dto, events)));
     }
 
     @Transactional(readOnly = true)
@@ -47,14 +47,14 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
         Pageable pageable = PageRequest.of(from, size, Sort.by(Sort.Direction.ASC, "id"));
         return compilationRepository.findAllByPinnedIsNullOrPinned(pinned, pageable).stream()
-                .map(CompilationMapper.INSTANCE::toDto)
+                .map(COMPILATION_MAPPER::toDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     @Override
     public CompilationDto getById(Long compId) {
-        return CompilationMapper.INSTANCE.toDto(compilationRepository.findById(compId)
+        return COMPILATION_MAPPER.toDto(compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundError("Compilation id=" + compId + " not found.")));
     }
 
@@ -71,14 +71,15 @@ public class CompilationServiceImpl implements CompilationService {
         Optional.ofNullable(compilationRequest.getTitle()).ifPresent(compilation::setTitle);
         Optional.ofNullable(compilationRequest.getPinned()).ifPresent(compilation::setPinned);
 
-        return CompilationMapper.INSTANCE.toDto(compilation);
+        return COMPILATION_MAPPER.toDto(compilation);
     }
 
     @Transactional
     @Override
     public void delete(Long compId) {
-        compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundError("Compilation id=" + compId + " not found."));
+        if (!compilationRepository.existsById(compId)) {
+            throw new NotFoundError("Compilation id=" + compId + " not found.");
+        }
         compilationRepository.deleteById(compId);
     }
 }
