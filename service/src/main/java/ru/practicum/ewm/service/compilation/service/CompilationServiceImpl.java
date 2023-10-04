@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.service.compilation.dto.CompilationDto;
@@ -45,7 +44,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Transactional(readOnly = true)
     @Override
     public List<CompilationDto> getAll(Boolean pinned, int from, int size) {
-        Pageable pageable = PageRequest.of(from, size, Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(from, size);
         return compilationRepository.findAllByPinnedIsNullOrPinned(pinned, pageable).stream()
                 .map(COMPILATION_MAPPER::toDto)
                 .collect(Collectors.toList());
