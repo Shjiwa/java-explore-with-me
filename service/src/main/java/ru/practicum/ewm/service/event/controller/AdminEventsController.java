@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.service.constant.EventState;
 import ru.practicum.ewm.service.event.dto.EventFullDto;
 import ru.practicum.ewm.service.event.dto.UpdateEventAdminRequest;
-import ru.practicum.ewm.service.event.service.EventService;
+import ru.practicum.ewm.service.event.service.AdminEventService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -21,7 +21,7 @@ import static ru.practicum.ewm.service.constant.DateTimeFormat.DATETIME_FORMAT;
 @RequestMapping("/admin/events")
 @RequiredArgsConstructor
 public class AdminEventsController {
-    private final EventService eventService;
+    private final AdminEventService adminEventService;
 
     @GetMapping
     public List<EventFullDto> getAll(@RequestParam(required = false) List<Long> users,
@@ -33,12 +33,16 @@ public class AdminEventsController {
                                          @DateTimeFormat(pattern = DATETIME_FORMAT) LocalDateTime rangeEnd,
                                      @Valid @RequestParam(defaultValue = "0") @Min(0) int from,
                                      @Valid @RequestParam(defaultValue = "10") @Min(1) int size) {
-        return eventService.getAllAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
+        log.info("Поступил запрос на получение списка событий: " +
+                "users={}, states={}, categories={}, rangeStart={}, rangeEnd={}, from={}, size={}",
+                users, states, categories, rangeStart, rangeEnd, from, size);
+        return adminEventService.getAllAdmin(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @PatchMapping("/{eventId}")
     public EventFullDto update(@PathVariable Long eventId,
                                @Valid @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
-        return eventService.updateAdmin(eventId, updateEventAdminRequest);
+        log.info("Поступил запрос на изменение события с id={}, updateData={}", eventId, updateEventAdminRequest);
+        return adminEventService.updateAdmin(eventId, updateEventAdminRequest);
     }
 }

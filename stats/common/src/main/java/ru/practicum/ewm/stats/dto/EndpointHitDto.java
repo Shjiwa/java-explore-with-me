@@ -2,8 +2,10 @@ package ru.practicum.ewm.stats.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -13,6 +15,8 @@ import static ru.practicum.ewm.stats.dto.util.DateTimeFormat.DATETIME_FORMAT;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class EndpointHitDto {
     @NotBlank
     private String app;

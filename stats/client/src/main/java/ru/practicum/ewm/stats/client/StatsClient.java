@@ -1,6 +1,8 @@
 package ru.practicum.ewm.stats.client;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import ru.practicum.ewm.stats.dto.EndpointHitDto;
@@ -8,10 +10,11 @@ import ru.practicum.ewm.stats.dto.ViewStatsDto;
 
 import java.util.List;
 
+@Service
 public class StatsClient {
     private final WebClient webClient;
 
-    public StatsClient(String serverUrl) {
+    public StatsClient(@Value("${stats.server.url}") String serverUrl) {
         webClient = WebClient.builder().baseUrl(serverUrl).build();
     }
 

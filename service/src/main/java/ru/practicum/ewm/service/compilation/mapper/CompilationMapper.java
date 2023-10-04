@@ -13,7 +13,7 @@ import java.util.List;
 
 @Mapper(uses = EventMapper.class)
 public interface CompilationMapper {
-    CompilationMapper INSTANCE = Mappers.getMapper(CompilationMapper.class);
+    CompilationMapper COMPILATION_MAPPER = Mappers.getMapper(CompilationMapper.class);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "events", source = "events")

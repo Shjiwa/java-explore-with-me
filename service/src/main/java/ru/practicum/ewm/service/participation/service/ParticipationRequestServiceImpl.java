@@ -7,7 +7,6 @@ import ru.practicum.ewm.service.error.NotFoundError;
 import ru.practicum.ewm.service.event.model.Event;
 import ru.practicum.ewm.service.event.repository.EventRepository;
 import ru.practicum.ewm.service.participation.dto.ParticipationRequestDto;
-import ru.practicum.ewm.service.participation.mapper.ParticipationRequestMapper;
 import ru.practicum.ewm.service.participation.model.ParticipationRequest;
 import ru.practicum.ewm.service.participation.repository.ParticipationRequestRepository;
 import ru.practicum.ewm.service.user.model.User;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.service.constant.EventState.PUBLISHED;
 import static ru.practicum.ewm.service.constant.ParticipationRequestStatus.*;
+import static ru.practicum.ewm.service.participation.mapper.ParticipationRequestMapper.REQUEST_MAPPER;
 
 @Service
 @RequiredArgsConstructor
@@ -51,26 +51,30 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         participationRequest.setRequester(user);
         participationRequest.setStatus(
                 event.getRequestModeration() && !event.getParticipantLimit().equals(0) ? PENDING : CONFIRMED);
-        return ParticipationRequestMapper.INSTANCE.toDto(participationRequestRepository.save(participationRequest));
+        return REQUEST_MAPPER.toDto(participationRequestRepository.save(participationRequest));
     }
 
     @Override
     public List<ParticipationRequestDto> getAllRequests(Long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundError("User id=" + userId + "not found."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundError("User id=" + userId + "not found.");
+        }
         return participationRequestRepository.findAllByRequesterId(userId).stream()
-                .map(ParticipationRequestMapper.INSTANCE::toDto)
+                .map(REQUEST_MAPPER::toDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ParticipationRequestDto update(Long userId, Long requestId) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundError("User id=" + userId + "not found."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundError("User id=" + userId + "not found.");
+        }
         ParticipationRequest request = participationRequestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundError("Participation request id=" + requestId + " not found."));
         if (!request.getRequester().getId().equals(userId)) {
             throw new NotFoundError("Request id=" + requestId + " not found.");
         }
         request.setStatus(CANCELED);
-        return ParticipationRequestMapper.INSTANCE.toDto(participationRequestRepository.save(request));
+        return REQUEST_MAPPER.toDto(participationRequestRepository.save(request));
     }
 }

@@ -10,12 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.service.error.NotFoundError;
 import ru.practicum.ewm.service.user.dto.NewUserRequest;
 import ru.practicum.ewm.service.user.dto.UserDto;
-import ru.practicum.ewm.service.user.mapper.UserMapper;
 import ru.practicum.ewm.service.user.model.User;
 import ru.practicum.ewm.service.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.practicum.ewm.service.user.mapper.UserMapper.USER_MAPPER;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserDto create(NewUserRequest request) {
-        return UserMapper.INSTANCE.toDto(userRepository.save(UserMapper.INSTANCE.fromNewRequest(request)));
+        return USER_MAPPER.toDto(userRepository.save(USER_MAPPER.fromNewRequest(request)));
     }
 
     @Transactional(readOnly = true)
@@ -39,14 +40,16 @@ public class UserServiceImpl implements UserService {
             users = userRepository.findAll(pageable);
         }
         return users.getContent().stream()
-                .map(UserMapper.INSTANCE::toDto)
+                .map(USER_MAPPER::toDto)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     @Override
     public void delete(Long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new NotFoundError("User id=" + userId + " not found."));
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundError("User id=" + userId + "not found.");
+        }
         userRepository.deleteById(userId);
     }
 }

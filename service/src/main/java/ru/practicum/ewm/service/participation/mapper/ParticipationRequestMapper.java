@@ -8,7 +8,7 @@ import ru.practicum.ewm.service.participation.model.ParticipationRequest;
 
 @Mapper
 public interface ParticipationRequestMapper {
-    ParticipationRequestMapper INSTANCE = Mappers.getMapper(ParticipationRequestMapper.class);
+    ParticipationRequestMapper REQUEST_MAPPER = Mappers.getMapper(ParticipationRequestMapper.class);
 
     @Mapping(target = "requester", source = "requester.id")
     @Mapping(target = "event", source = "event.id")
