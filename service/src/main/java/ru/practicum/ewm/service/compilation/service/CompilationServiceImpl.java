@@ -39,7 +39,7 @@ public class CompilationServiceImpl implements CompilationService {
             dto.setPinned(false);
         }
 
-        return COMPILATION_MAPPER .toDto(compilationRepository.save(COMPILATION_MAPPER.fromDto(dto, events)));
+        return COMPILATION_MAPPER.toDto(compilationRepository.save(COMPILATION_MAPPER.fromDto(dto, events)));
     }
 
     @Transactional(readOnly = true)
