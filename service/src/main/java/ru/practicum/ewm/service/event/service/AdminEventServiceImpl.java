@@ -42,18 +42,11 @@ public class AdminEventServiceImpl implements AdminEventService {
     private final ParticipationRequestRepository participationRequestRepository;
     private final StatsClient statsClient;
 
-    @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> getAllAdmin(List<Long> users, List<EventState> states, List<Long> categories,
                                           LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         Pageable pageable = PageRequest.of(from, size);
 
-        if (users != null && users.size() == 1 && users.get(0).equals(0L)) {
-            users = null;
-        }
-        if (categories != null && categories.size() == 1 && categories.get(0).equals(0L)) {
-            categories = null;
-        }
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
         }
@@ -90,9 +83,9 @@ public class AdminEventServiceImpl implements AdminEventService {
                 .orElseThrow(() -> new NotFoundError("Event id=" + eventId + " not found."));
 
         if (updateEventAdminRequest.getEventTimestamp() != null
-                && LocalDateTime.now().plusHours(2).isAfter(updateEventAdminRequest.getEventTimestamp())) {
+                && LocalDateTime.now().plusHours(1).isAfter(updateEventAdminRequest.getEventTimestamp())) {
             throw new ConflictError("The date and time for which the event is scheduled cannot be earlier than " +
-                    "two hours from the current moment.");
+                    "one hour from the current moment.");
         }
 
         if (updateEventAdminRequest.getStateAction() != null) {
@@ -104,7 +97,7 @@ public class AdminEventServiceImpl implements AdminEventService {
             if (updateEventAdminRequest.getStateAction().equals(REJECT_EVENT) &&
                     event.getState().equals(EventState.PUBLISHED)) {
                 throw new ConflictError(
-                        "Cannot reject the event because it's not in the right state: " + event.getState());
+                        "The event cannot be rejected because it is in the wrong state: " + event.getState());
             }
         }
 
@@ -136,10 +129,7 @@ public class AdminEventServiceImpl implements AdminEventService {
                     break;
             }
         }
-
-        event = eventRepository.save(event);
-
-        return EVENT_MAPPER.toFullDto(event);
+        return EVENT_MAPPER.toFullDto(eventRepository.save(event));
     }
 
     /**

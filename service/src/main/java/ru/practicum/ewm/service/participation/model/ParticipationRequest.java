@@ -22,11 +22,11 @@ public class ParticipationRequest {
     @Column(name = "participation_request_created")
     private LocalDateTime created;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "participation_request_event_id", nullable = false)
     private Event event;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "participation_request_requester_id", nullable = false)
     private User requester;
 

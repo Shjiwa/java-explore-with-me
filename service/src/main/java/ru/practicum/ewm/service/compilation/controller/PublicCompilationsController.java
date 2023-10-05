@@ -19,8 +19,8 @@ public class PublicCompilationsController {
 
     @GetMapping
     public List<CompilationDto> getAll(@RequestParam(required = false) Boolean pinned,
-                                       @Valid @RequestParam(defaultValue = "0") @Min(0) int from,
-                                       @Valid @RequestParam(defaultValue = "10") @Min(1) int size) {
+                                       @Valid @RequestParam(required = false, defaultValue = "0") @Min(0) int from,
+                                       @Valid @RequestParam(required = false, defaultValue = "10") @Min(1) int size) {
         log.info("Поступил запрос на получение подборок событий.");
         return compilationService.getAll(pinned, from, size);
     }

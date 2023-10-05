@@ -3,7 +3,6 @@ package ru.practicum.ewm.service.event.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.ewm.service.constant.EventState;
 import ru.practicum.ewm.service.constant.SortMode;
 import ru.practicum.ewm.service.error.NotFoundError;
 import ru.practicum.ewm.service.event.dto.EventFullDto;
@@ -25,6 +24,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.service.constant.DateTimeFormat.DATETIME_FORMAT;
+import static ru.practicum.ewm.service.constant.EventState.PUBLISHED;
 import static ru.practicum.ewm.service.constant.ParticipationRequestStatus.CONFIRMED;
 import static ru.practicum.ewm.service.event.mapper.EventMapper.EVENT_MAPPER;
 
@@ -110,8 +110,8 @@ public class PublicEventServiceImpl implements PublicEventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundError("Event id=" + eventId + " not found."));
 
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new NotFoundError("Event id=" + eventId + " not found");
+        if (!event.getState().equals(PUBLISHED)) {
+            throw new NotFoundError("Event id=" + eventId + " is not published.");
         }
 
         statsClient.hit(EndpointHitDto.builder()
@@ -124,13 +124,13 @@ public class PublicEventServiceImpl implements PublicEventService {
         List<String> eventUrls = Collections.singletonList("/events/" + event.getId());
 
         List<ViewStatsDto> viewStatsDtos = statsClient.getStats(
-                LocalDateTime.MIN.format(DateTimeFormatter.ofPattern(DATETIME_FORMAT)),
-                LocalDateTime.MAX.format(DateTimeFormatter.ofPattern(DATETIME_FORMAT)),
+                LocalDateTime.now().minusYears(100).format(DateTimeFormatter.ofPattern(DATETIME_FORMAT)),
+                LocalDateTime.now().plusYears(100).format(DateTimeFormatter.ofPattern(DATETIME_FORMAT)),
                 eventUrls, true);
 
         EventFullDto dto = EVENT_MAPPER.toFullDto(event);
+        dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(event.getId(), CONFIRMED));
         dto.setViews(viewStatsDtos.isEmpty() ? 0L : viewStatsDtos.get(0).getHits());
-        dto.setConfirmedRequests(participationRequestRepository.countByEventIdAndStatus(dto.getId(), CONFIRMED));
 
         return dto;
     }

@@ -74,6 +74,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (!request.getRequester().getId().equals(userId)) {
             throw new NotFoundError("Request id=" + requestId + " not found.");
         }
+        if (request.getStatus().equals(CONFIRMED)) {
+            throw new ConflictError("Unable to cancel confirmed request.");
+        }
         request.setStatus(CANCELED);
         return REQUEST_MAPPER.toDto(participationRequestRepository.save(request));
     }

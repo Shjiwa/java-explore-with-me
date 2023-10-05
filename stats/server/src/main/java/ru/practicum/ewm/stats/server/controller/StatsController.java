@@ -9,7 +9,6 @@ import ru.practicum.ewm.stats.dto.EndpointHitDto;
 import ru.practicum.ewm.stats.dto.ViewStatsDto;
 import ru.practicum.ewm.stats.server.service.StatsService;
 
-import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,7 +22,7 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public void hit(@Valid @RequestBody EndpointHitDto endpointHitDto) {
+    public void hit(@RequestBody EndpointHitDto endpointHitDto) {
         statsService.hit(endpointHitDto);
     }
 

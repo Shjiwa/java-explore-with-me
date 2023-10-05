@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.service.category.model.Category;
 import ru.practicum.ewm.service.category.repository.CategoryRepository;
 import ru.practicum.ewm.service.constant.EventState;
+import ru.practicum.ewm.service.constant.ParticipationRequestStatus;
 import ru.practicum.ewm.service.error.ConflictError;
 import ru.practicum.ewm.service.error.NotFoundError;
 import ru.practicum.ewm.service.event.dto.*;
@@ -60,17 +61,17 @@ public class PrivateEventServiceImpl implements PrivateEventService {
 
         event.setInitiator(user);
         event.setCreatedOn(LocalDateTime.now());
-        event.setState(PENDING);
         event.setPaid(newEventDto.getPaid() != null && newEventDto.getPaid());
         event.setParticipantLimit(newEventDto.getParticipantLimit() == null ? 0 : newEventDto.getParticipantLimit());
         event.setRequestModeration(newEventDto.getRequestModeration() == null || newEventDto.getRequestModeration());
+        event.setState(PENDING);
         return EVENT_MAPPER.toFullDto(eventRepository.save(event));
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getAllPrivate(Long userId, int from, int size) {
-        Pageable pageable = PageRequest.of(from / size, size);
+        Pageable pageable = PageRequest.of(from, size);
         List<Event> events = eventRepository.findAllByInitiatorId(userId, pageable);
         return events.stream()
                 .map(EVENT_MAPPER::toShortDto)
@@ -141,12 +142,9 @@ public class PrivateEventServiceImpl implements PrivateEventService {
                     break;
             }
         }
-
-        event = eventRepository.save(event);
-        return EVENT_MAPPER.toFullDto(event);
+        return EVENT_MAPPER.toFullDto(eventRepository.save(event));
     }
 
-    @Transactional(readOnly = true)
     @Override
     public EventRequestStatusUpdateResult updateParticipationRequests(
             Long userId, Long eventId,
@@ -156,11 +154,13 @@ public class PrivateEventServiceImpl implements PrivateEventService {
         }
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundError("Event id=" + eventId + " not found."));
+        if (!event.getRequestModeration() || event.getParticipantLimit() == 0) {
+            throw new ConflictError("Event participant limit is 0 or request moderation is disabled.");
+        }
 
-        long confirmLimit = event.getParticipantLimit() - participationRequestRepository
-                .countByEventIdAndStatus(eventId, CONFIRMED);
+        long confirmedReq = participationRequestRepository.countByEventIdAndStatus(eventId, CONFIRMED);
 
-        if (confirmLimit <= 0) {
+        if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= confirmedReq) {
             throw new ConflictError("The number of requests for participation has exceeded the limit.");
         }
 
@@ -180,31 +180,33 @@ public class PrivateEventServiceImpl implements PrivateEventService {
                 .rejectedRequests(new ArrayList<>())
                 .build();
 
-        for (ParticipationRequest req : requestList) {
-            if (!req.getEvent().getId().equals(eventId)) {
-                throw new NotFoundError("Participation request id=" + req.getId() + " not found");
+        for (ParticipationRequest request : requestList) {
+            if (!request.getStatus().equals(ParticipationRequestStatus.PENDING)) {
+                throw new ConflictError("Unable to accept/reject request that not is in pending state.");
             }
-            if (confirmLimit <= 0) {
-                req.setStatus(REJECTED);
-                result.getRejectedRequests().add(REQUEST_MAPPER.toDto(req));
+            if (!request.getEvent().getId().equals(eventId)) {
+                result.getRejectedRequests().add(REQUEST_MAPPER.toDto(request));
                 continue;
             }
-
             switch (eventRequestStatusUpdateRequest.getStatus()) {
                 case CONFIRMED:
-                    req.setStatus(CONFIRMED);
-                    result.getConfirmedRequests().add(REQUEST_MAPPER.toDto(req));
-                    confirmLimit--;
+                    if (confirmedReq < event.getParticipantLimit()) {
+                        request.setStatus(CONFIRMED);
+                        confirmedReq++;
+                        result.getConfirmedRequests().add(REQUEST_MAPPER.toDto(request));
+                    } else {
+                        request.setStatus(REJECTED);
+                        result.getRejectedRequests().add(REQUEST_MAPPER.toDto(request));
+                        throw new ConflictError("Participant limit has reached.");
+                    }
                     break;
                 case REJECTED:
-                    req.setStatus(REJECTED);
-                    result.getRejectedRequests().add(REQUEST_MAPPER.toDto(req));
+                    request.setStatus(REJECTED);
+                    result.getRejectedRequests().add(REQUEST_MAPPER.toDto(request));
                     break;
             }
         }
-
         participationRequestRepository.saveAll(requestList);
-
         return result;
     }
 

@@ -48,9 +48,9 @@ public class PublicEventsController {
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
     }
 
-    @GetMapping("/{id}")
-    public EventFullDto getById(@PathVariable Long id, HttpServletRequest request) {
-        log.info("Поступил запрос на получение информации о событии с id={}", id);
-        return publicEventService.getByIdPublic(id, request);
+    @GetMapping("/{eventId}")
+    public EventFullDto getById(@PathVariable Long eventId, HttpServletRequest request) {
+        log.info("Поступил запрос на получение информации о событии с id={}", eventId);
+        return publicEventService.getByIdPublic(eventId, request);
     }
 }

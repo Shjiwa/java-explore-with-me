@@ -11,7 +11,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("users/{userId}/requests")
+@RequestMapping("/users/{userId}/requests")
 @RequiredArgsConstructor
 public class PrivateParticipationRequestsController {
     private final ParticipationRequestService participationRequestService;

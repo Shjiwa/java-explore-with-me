@@ -1,9 +1,9 @@
 package ru.practicum.ewm.service.category.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.service.category.dto.CategoryDto;
 import ru.practicum.ewm.service.category.model.Category;
 import ru.practicum.ewm.service.category.repository.CategoryRepository;
@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.service.category.mapper.CategoryMapper.CATEGORY_MAPPER;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
@@ -28,17 +27,19 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getAll(int from, int size) {
-        return categoryRepository.findAll(PageRequest.of(from / size, size)).getContent().stream()
+        return categoryRepository.findAll(PageRequest.of(from, size)).getContent().stream()
                 .map(CATEGORY_MAPPER::toDto)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CategoryDto getById(Long catId) {
         return CATEGORY_MAPPER.toDto(categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundError("Category id=" + catId + " not found.")));
     }
 
+    @Transactional
     @Override
     public CategoryDto update(Long catId, CategoryDto dto) {
         Category category = categoryRepository.findById(catId)
@@ -47,6 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
         return CATEGORY_MAPPER.toDto(categoryRepository.save(category));
     }
 
+    @Transactional
     @Override
     public void delete(Long catId) {
         if (!categoryRepository.existsById(catId)) {
