@@ -15,6 +15,13 @@ import java.net.SocketException;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequest(final BadRequestError e) {
+        log.error(e.getMessage(), e);
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
