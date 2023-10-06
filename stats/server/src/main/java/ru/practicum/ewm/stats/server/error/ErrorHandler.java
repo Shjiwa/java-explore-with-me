@@ -13,6 +13,12 @@ import java.net.SocketException;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleBadRequest(final BadRequestError e) {
+        log.error(e.getMessage(), e);
+        return new ErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -33,12 +39,5 @@ public class ErrorHandler {
     public ErrorResponse handleUnavailable(final SocketException e) {
         log.error(e.getMessage(), e);
         return new ErrorResponse(HttpStatus.SERVICE_UNAVAILABLE, e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleInternalServerErrorException(final RuntimeException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 }
