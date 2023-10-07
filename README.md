@@ -13,6 +13,7 @@ In this app you can propose any event from an exhibition to a trip to the cinema
   *  Adding, updating, deleting, receiving a **compilation of events**
   *  Adding, canceling, receiving **requests to participate** in an event
   *  Getting **statistics** on visits
+  *  Add, change, delete **comments**
 
 ## Modules
 * **service**: Main module of the Explore With Me app
