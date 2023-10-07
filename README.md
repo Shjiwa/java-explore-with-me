@@ -23,10 +23,10 @@ In this app you can propose any event from an exhibition to a trip to the cinema
     * **server** Main statistics server, all logic is here
 
 ## API Specification
-[stats](https://github.com/Shjiwa/java-explore-with-me/blob/main/ewm-main-service-spec.json
+[ewm](https://github.com/Shjiwa/java-explore-with-me/blob/main/ewm-main-service-spec.json
 )
 
-[ewm](https://github.com/Shjiwa/java-explore-with-me/blob/main/ewm-stats-service-spec.json)
+[stats](https://github.com/Shjiwa/java-explore-with-me/blob/main/ewm-stats-service-spec.json)
 
 ## Database diagrams
 
