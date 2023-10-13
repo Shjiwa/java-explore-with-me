@@ -15,6 +15,17 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleForbiddenError(final ForbiddenError e) {
+        return ApiError.builder()
+                .status(HttpStatus.FORBIDDEN)
+                .reason("You don't have permission to access this option.")
+                .message(e.getMessage())
+                .errorTimestamp(LocalDateTime.now())
+                .build();
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleBadRequestException(final BadRequestError e) {
         return ApiError.builder()
